@@ -6,6 +6,7 @@ import matplotlib.image as mplimg
 ##Upload Images to Test
 
 '''
+#Test Image
 img = numpy.array([[0,0,0,0,0,0,1,0,0],
                    [0,0,0,0,0,0,0,0,0],
                    [0,0,1,1,1,1,1,1,0],
@@ -15,6 +16,7 @@ img = numpy.array([[0,0,0,0,0,0,1,0,0],
                    [0,0,0,0,0,0,0,0,0],
                    [0,0,1,0,0,0,0,0,0]])
 '''
+#Spells out CPP as a binaru image
 img = numpy.array([[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
                    [0,0,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,0],
@@ -125,6 +127,7 @@ while 1==1:
        break
     else: dialatedPrevious = Dialated
 
+#Generate Complement
 Dialated = 1-Dialated
 
 displayImg(Dialated, 'Final')
