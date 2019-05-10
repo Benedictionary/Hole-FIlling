@@ -2,7 +2,10 @@ import numpy
 import matplotlib.pyplot as mplplt
 import matplotlib.image as mplimg
 
+
 ##Upload Images to Test
+
+'''
 img = numpy.array([[0,0,0,0,0,0,1,0,0],
                    [0,0,0,0,0,0,0,0,0],
                    [0,0,1,1,1,1,1,1,0],
@@ -11,9 +14,30 @@ img = numpy.array([[0,0,0,0,0,0,1,0,0],
                    [0,0,1,1,1,1,1,1,0],
                    [0,0,0,0,0,0,0,0,0],
                    [0,0,1,0,0,0,0,0,0]])
+'''
+img = numpy.array([[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                   [0,0,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,0],
+                   [0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,1,0,0,0,0,1,0],
+                   [0,0,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,0],
+                   [0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0],
+                   [0,0,1,1,1,1,1,1,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0],
+                   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]])
+'''
+#Takes forever to compute with my implementation for the following image, but it works
+img = mplimg.imread(r'BinaryImg2.jpg') 
 
+def rgb2gray(image):
+    imgNew = numpy.dot(image[...,:3], [0.2126, 0.7152, 0.0722])
+    return imgNew
+
+img = rgb2gray(img)/255.0
+img = numpy.around(img)
+img = img.astype(int)
+'''
 #Function for Displaying Binary Images with a title
 def displayImg(img, title):
+    img = img.astype(int)
     mplplt.imshow(img, cmap='gray')
     mplplt.title(title)
     mplplt.show()
@@ -42,6 +66,8 @@ def markerImage(img):
                 markerImg[x,y] = 0
     return markerImg
 markerImg = markerImage(img)
+print("MarkerImg: ", markerImg)
+
 #Display the Marker
 displayImg(markerImg, 'Marker F(x,y)')
 
@@ -66,39 +92,39 @@ def convMult(Frame, matrix, sideMax, x, y):
     for i in range(0, 3):
         for j in range (0, 3):
             imgFiltEntry = imgFiltEntry + matrix[j,i]*Frame[x-sideMax+j, y-sideMax+i]
+            if imgFiltEntry > 0.0:
+                break
+        if imgFiltEntry > 0.0:
+            break
     return imgFiltEntry
 
 def convolution(matrix, Frame):
     imgXSize, imgYSize = numpy.shape(Frame)
-    print("Original X:", imgXSize)
-    print("Original Y:", imgYSize)
     padFrame = padImage(Frame)
     sideMax = 1
     imgFilt = numpy.zeros((imgXSize + 2, imgYSize + 2)) * 1.0  # creates the zeroed out "canvas" that our filtered Image will be on
     imgXSize, imgYSize = numpy.shape(imgFilt)
-    print("Padded X:", imgXSize)
-    print("Padded Y:", imgYSize)
-
     for x in range(1,imgXSize-1):
         for y in range (1, imgYSize-1):
             convCheck = convMult(padFrame, matrix, sideMax, x, y) #each element of the convoluted Image is computed with convMult()
-            if convCheck >= 1:
+            if convCheck >= 0.5:
                 imgFilt[x, y] = 1
+        #displayImg(imgFilt, "imgtest")
 
-    displayImg(imgFilt, "imgtest")
     imgFilt = unpad1(imgFilt)
     return imgFilt
 
+Dialated = markerImg
 #Obtain the Complement
-Dialated = convolution(BKernal, markerImg) * maskImg
+dialatedPrevious = Dialated
+iterations = 0
+while 1==1:
+    Dialated = convolution(BKernal, dialatedPrevious) * maskImg
+    iterations += 1
+    if numpy.all(dialatedPrevious == Dialated):
+       break
+    else: dialatedPrevious = Dialated
 
-print(Dialated)
-displayImg(Dialated, 'Convolution')
+Dialated = 1-Dialated
 
-'''
-padTest = padImage(markerImg)
-print(padTest)
-
-unpadTest = unpad1(padTest)
-print(unpadTest)
-'''
+displayImg(Dialated, 'Final')
