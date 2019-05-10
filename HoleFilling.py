@@ -47,11 +47,8 @@ def displayImg(img, title):
 ##Display Original Image
 displayImg(img, 'Original Image I(x,y)')
 
-#Function for generating a mask of the image
-def mask(img):
-    img = 1-img
-    return img
-maskImg = mask(img)
+#Generate a mask of the image
+maskImg = 1- img
 
 ##Display Mask
 displayImg(maskImg, 'Mask Ic(x,y)')
@@ -68,19 +65,20 @@ def markerImage(img):
                 markerImg[x,y] = 0
     return markerImg
 markerImg = markerImage(img)
-print("MarkerImg: ", markerImg)
 
 #Display the Marker
 displayImg(markerImg, 'Marker F(x,y)')
 
 BKernal = numpy.ones((3,3))
-print(BKernal)
+
+#Function for Padding the Image for Convolution
 def padImage(img):
     padOneSideX = 1
     padOneSideY = 1
     paddedImg = numpy.lib.pad(img, ((padOneSideY,padOneSideY),(padOneSideX,padOneSideX)), 'constant', constant_values=0) #paddedImg = numpy.lib.pad(a, ((5,5), (2,2)), 'constant', constant_values=0)  # numpy.int finds integer floor of argument
     return paddedImg
 
+#Function for Padding the Image for Convolution
 def unpad1(img):
     imgXSize,imgYSize = numpy.shape(img)
     imgUnpad = numpy.delete(img, imgYSize-1, 1)
@@ -89,6 +87,7 @@ def unpad1(img):
     imgUnpad = numpy.delete(imgUnpad, 0, 1)
     return imgUnpad
 
+#Function for Handling the elementwise Multiplication for the Convolution. Optimized for binary images
 def convMult(Frame, matrix, sideMax, x, y):
     imgFiltEntry = 0.0
     for i in range(0, 3):
@@ -100,6 +99,7 @@ def convMult(Frame, matrix, sideMax, x, y):
             break
     return imgFiltEntry
 
+#A function for Generating the Convolution for the binary image
 def convolution(matrix, Frame):
     imgXSize, imgYSize = numpy.shape(Frame)
     padFrame = padImage(Frame)
@@ -116,18 +116,21 @@ def convolution(matrix, Frame):
     imgFilt = unpad1(imgFilt)
     return imgFilt
 
-Dialated = markerImg
 #Obtain the Complement
-dialatedPrevious = Dialated
-iterations = 0
+fillPrevious = markerImg
+
+iterations = 0 #Keeps track of the number of times we fill the holes
+
+#Lets fill the holes by dilating the frame with the kernal and then finding the intersection between it and the complement of the image
 while 1==1:
-    Dialated = convolution(BKernal, dialatedPrevious) * maskImg
+    fill = convolution(BKernal, fillPrevious) * maskImg
     iterations += 1
-    if numpy.all(dialatedPrevious == Dialated):
+    if numpy.all(fillPrevious == fill):
        break
-    else: dialatedPrevious = Dialated
+    else: fillPrevious = fill
 
 #Generate Complement
-Dialated = 1-Dialated
+fill= 1-fill
 
-displayImg(Dialated, 'Final')
+print("Total Iterations: ", iterations)
+displayImg(fill, 'Final')
